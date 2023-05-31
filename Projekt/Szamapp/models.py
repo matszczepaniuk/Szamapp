@@ -22,7 +22,8 @@ class FavouriteRecipes(models.Model):
 
 
 class User(User):
-    favourites = models.ForeignKey(FavouriteRecipes, on_delete=models.CASCADE)
+    def get_short_name(self):
+        return self.first_name
 
 
 class Statistics(models.Model):

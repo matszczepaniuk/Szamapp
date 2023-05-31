@@ -16,10 +16,13 @@ Including another URLconf
 """
 from django.contrib import admin
 from django.urls import include, path
-from Szamapp.views import *
+
+from Szamapp.views import UserLoginView, index, RegistrationView
 
 urlpatterns = [
     path('', index, name='index'),
     path("admin/", admin.site.urls),
-    path("", include('theme_soft_design.urls'))
+    path("", include('theme_soft_design.urls')),
+    path("login/", UserLoginView.as_view(), name="login"),
+    path("register/", RegistrationView.as_view(), name="register")
 ]
