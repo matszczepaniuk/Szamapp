@@ -53,3 +53,18 @@ class RegistrationView(View):
                 return redirect('login')
             else:
                 return redirect('login')
+
+
+class UserAccountView(View):
+    def get(self, request):
+        username = request.user.username
+        user = User.objects.get(username=username)
+
+    def post(self, request):
+        username = request.user.username
+        user = User.objects.get(username=username)
+        if "delete" in request.POST:
+            user.delete()
+
+
+
