@@ -1,4 +1,4 @@
-django
+django~=4.2.1
 gunicorn
 python-dotenv
 whitenoise
@@ -6,3 +6,5 @@ django-theme-soft-design==1.0.10
 
 # psycopg2-binary
 # mysqlclient
+
+openai~=0.27.8

@@ -29,3 +29,16 @@ class User(User):
 class Statistics(models.Model):
     recipes = models.IntegerField
     users = models.IntegerField
+
+
+class MealBaseOptions(models.Model):
+    name = models.CharField(max_length=32)
+
+    def __str__(self):
+        return self.name
+
+
+class Chat(models.Model):
+    text = models.CharField(max_length=500)
+    gpt = models.CharField(max_length=17000)
+    date = models.DateTimeField(auto_now_add=True, blank=True, null=True)

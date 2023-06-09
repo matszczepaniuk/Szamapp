@@ -1,0 +1,35 @@
+{% extends 'layouts/base_sections.html' %}
+{% load static %}
+
+{% block title %} Soft UI Design System by Creative Tim {% endblock title %}
+
+{% block body %} class="features-sections" {% endblock body %}
+
+{% block header %}
+
+{% include 'includes/navigation_light.html' %}
+
+{% endblock header %}
+
+{% block content %}
+
+    <form method="POST">
+        {% csrf_token %}
+        <input type="submit" name="btn" value="Do 15 minut">
+        <input type="submit" name="btn" value="Do 30 minut">
+        <input type="submit" name="btn" value="Do 60 minut">
+        <input type="submit" name="btn" value="Do 120 minut">
+    </form>
+    {{ val }}
+
+{% endblock content %}
+
+{% block footer %}
+  
+  {% include 'includes/footer_fullscreen.html' %}
+  
+{% endblock footer %}
+
+{% block javascripts %}
+
+{% endblock javascripts %}
