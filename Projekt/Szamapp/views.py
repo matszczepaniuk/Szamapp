@@ -73,7 +73,9 @@ class UserAccountView(View):
         if request.user.is_authenticated:
             username = request.user.get_username()
             user = User.objects.get(username=username)
-            return render(request, 'pages/account.html')
+            user_id = user.id
+            saved_recipes = FavouriteRecipes.objects.filter(user_id_id=user_id)
+            return render(request, 'pages/account.html', {'saved_recipes': saved_recipes})
         else:
             return redirect('login')
 

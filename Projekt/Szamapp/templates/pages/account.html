@@ -16,6 +16,11 @@
 
     <h4 class="mb-0">Moje ulubione przepisy</h4>
 
+    <ul>
+        {% for recipe in saved_recipes %}
+        <li>{{ recipe.name }}</li>
+        {% endfor %}
+    </ul>
 
 {% endblock content %}
 
