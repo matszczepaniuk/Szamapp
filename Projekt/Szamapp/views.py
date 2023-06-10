@@ -172,16 +172,22 @@ class AppStep4View(View):
             ingredient_4 = form.cleaned_data.get("ingredient4")
             ingredient_5 = form.cleaned_data.get("ingredient5")
             ingredients = [ingredient_1, ingredient_2]
+            i1 = Ingredient.objects.create(name=ingredient_1)
+            i1.save()
+            i2 = Ingredient.objects.create(name=ingredient_2)
+            i2.save()
             if ingredient_3 is not None:
                 ingredients.append(ingredient_3)
-            else:
-                pass
+                i3 = Ingredient.objects.create(name=ingredient_3)
+                i3.save()
             if ingredient_4 is not None:
                 ingredients.append(ingredient_4)
-            else:
-                pass
+                i4 = Ingredient.objects.create(name=ingredient_4)
+                i4.save()
             if ingredient_5 is not None:
                 ingredients.append(ingredient_5)
+                i5 = Ingredient.objects.create(name=ingredient_5)
+                i5.save()
             else:
                 pass
             request.session['ingredients'] = ingredients

@@ -17,13 +17,14 @@ class RecipeIngredient(models.Model):
     ingredient_id = models.ForeignKey(Ingredient, on_delete=models.CASCADE)
 
 
-class FavouriteRecipes(models.Model):
-    name = models.CharField(max_length=112)
-
-
 class User(User):
     def get_short_name(self):
         return self.first_name
+
+
+class FavouriteRecipes(models.Model):
+    name = models.CharField(max_length=112)
+    user_id = models.ForeignKey(User, on_delete=models.CASCADE, null=True)
 
 
 class Statistics(models.Model):
