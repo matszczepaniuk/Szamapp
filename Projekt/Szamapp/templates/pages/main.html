@@ -2,26 +2,19 @@
 {% load static %}
 
 {% block title %}
-
+Strona główna
 {% endblock title %}
 
 {% block body %} class="features-sections" {% endblock body %}
 
 {% block header %}
-
+    Witaj w SzamApp!
 {% endblock header %}
 
 {% block content %}
 
-    <form method="POST">
-        {% csrf_token %}
-        <input type="submit" name="btn" value="Pieczywo">
-        <input type="submit" name="btn" value="Ziemniaki">
-        <input type="submit" name="btn" value="Ryż">
-        <input type="submit" name="btn" value="Makaron">
-        <input type="submit" name="btn" value="Kasza">
-    </form>
-    {{ val }}
+    <a class="btn btn-primary" href="login/">Zaloguj się</a>
+    <a class="btn btn-primary" href="step1/">Kontynuuj bez logowania</a>
 
 {% endblock content %}
 

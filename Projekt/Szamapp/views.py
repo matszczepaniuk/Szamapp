@@ -1,37 +1,39 @@
 from django.shortcuts import render, redirect
 from django.views import View
 from django.contrib.auth import authenticate, login
-import django.contrib.sessions
 from Szamapp.forms import *
 from Szamapp.models import *
 from django.http import JsonResponse
-from django.views.decorators.csrf import csrf_exempt
+from django.views.decorators.csrf import csrf_exempt, csrf_protect
 import openai
 
 
 def index(request):
-    # Page from the theme
     return render(request, 'pages/index.html')
 
 
-class UserLoginView(View):
-    def get(self, request):
+def main(request):
+    return render(request, 'pages/main.html')
+
+
+@csrf_protect
+def userlogin(request):
+    if request.method == 'GET':
         form = UserLoginForm
         ctx = {
             'form': form
         }
         return render(request, 'pages/login.html', ctx)
 
-    def post(self, request):
+    if request.method == 'POST':
         username = request.POST["username"]
         password = request.POST["password"]
         user = authenticate(request, username=username, password=password)
         if user is not None:
             login(request, user)
-            message = "Zalogowano"
         else:
             return render(request, 'pages/login.html')
-        return render(request, 'pages/registration.html', context={'message': message})
+        return redirect('step1')
 
 
 class RegistrationView(View):
@@ -45,27 +47,42 @@ class RegistrationView(View):
     def post(self, request):
         form = RegistrationForm(request.POST)
         if form.is_valid():
-            username = request.POST["username"]
-            password1 = request.POST["password1"]
-            password2 = request.POST["password2"]
-            email = request.POST["email"]
+            username = form.cleaned_data.get("username")
+            password1 = form.cleaned_data.get("password1")
+            password2 = form.cleaned_data.get("password2")
+            email = form.cleaned_data.get("email")
             if password1 == password2:
                 new_user = User.objects.create_user(username=username, email=email, password=password1)
                 return redirect('login')
             else:
-                return redirect('login')
+                form = RegistrationForm(request.POST)
+                ctx = {
+                    'form': form
+                }
+                return render(request, 'pages/registration.html', ctx)
+        else:
+            form = RegistrationForm(request.POST)
+            ctx = {
+                'form': form
+            }
+            return render(request, 'pages/registration.html', ctx)
 
 
 class UserAccountView(View):
     def get(self, request):
-        username = request.user.username
-        user = User.objects.get(username=username)
+        if request.user.is_authenticated:
+            username = request.user.get_username()
+            user = User.objects.get(username=username)
+            return render(request, 'pages/account.html')
+        else:
+            return redirect('login')
 
     def post(self, request):
         username = request.user.username
         user = User.objects.get(username=username)
         if "delete" in request.POST:
             user.delete()
+        return render(request, 'pages/account.html')
 
 
 class AppStep1View(View):
@@ -149,11 +166,11 @@ class AppStep4View(View):
     def post(self, request):
         form = Step4Form(request.POST)
         if form.is_valid():
-            ingredient_1 = form.cleaned_data.get("ingredient_1")
-            ingredient_2 = form.cleaned_data.get("ingredient_2")
-            ingredient_3 = form.cleaned_data.get("ingredient_3")
-            ingredient_4 = form.cleaned_data.get("ingredient_4")
-            ingredient_5 = form.cleaned_data.get("ingredient_5")
+            ingredient_1 = form.cleaned_data.get("ingredient1")
+            ingredient_2 = form.cleaned_data.get("ingredient2")
+            ingredient_3 = form.cleaned_data.get("ingredient3")
+            ingredient_4 = form.cleaned_data.get("ingredient4")
+            ingredient_5 = form.cleaned_data.get("ingredient5")
             ingredients = [ingredient_1, ingredient_2]
             if ingredient_3 is not None:
                 ingredients.append(ingredient_3)
@@ -186,10 +203,16 @@ def chat(request):
 
 @csrf_exempt
 def Ajax(request):
+    meal_time = request.session.get('time')
+    meal_base = request.session.get('base')
+    meal_type = request.session.get('types')
+    meal_ingredients = request.session.get('ingredients')
     if request.headers.get('X-Requested-With') == 'XMLHttpRequest':  # Check if request is Ajax
-        text = request.POST.get('text')
+        text = f"Podaj propozycję przepisu na {meal_type} z następujących produktów: {meal_base}, {meal_ingredients}" \
+               f", czas przygotowania do {meal_time}, możesz dorzucić jakieś produkty od siebie, podaj także " \
+               f"instrukcję przygotowania."
         print(text)
-        openai.api_key = "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"
+        openai.api_key = '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'
         res = openai.ChatCompletion.create(
             model="gpt-3.5-turbo",
             messages=[
@@ -197,10 +220,7 @@ def Ajax(request):
             ]
         )
         response = res.choices[0].message["content"]
-        print(response)
-        chat = Chat.objects.create(
-            text=text,
-            gpt=response
-        )
+        print(res)
+        request.session['meal'] = response
         return JsonResponse({'data': response, })
     return JsonResponse({})

@@ -3,6 +3,10 @@ from django.contrib.auth.forms import UserCreationForm, AuthenticationForm, User
 from Szamapp.models import MealBaseOptions
 
 
+class MainForm(forms.Form):
+    button = forms.CharField()
+
+
 class RegistrationForm(UserCreationForm):
     username = forms.CharField(
         label="Username",

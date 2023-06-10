@@ -17,20 +17,21 @@ Including another URLconf
 from django.contrib import admin
 from django.urls import include, path
 
-from Szamapp.views import UserLoginView, index, RegistrationView, UserAccountView, AppStep1View, AppStep2View, \
-    AppStep3View, AppStep4View, chat, Ajax
+from Szamapp.views import userlogin, index, RegistrationView, UserAccountView, AppStep1View, AppStep2View, \
+    AppStep3View, AppStep4View, chat, Ajax, main
 
 urlpatterns = [
-    path('', index, name='index'),
+    path('', main, name='main'),
+    path('index/', index, name='index'),
     path("admin/", admin.site.urls),
-    path("", include('theme_soft_design.urls')),
+    path('index/', include('theme_soft_design.urls')),
     path('chat/', chat, name='chat'),
     path('ajax/', Ajax, name='ajax'),
-    path("login/", UserLoginView.as_view(), name="login"),
+    path("login/", userlogin, name="login"),
     path("register/", RegistrationView.as_view(), name="register"),
     path("account/", UserAccountView.as_view(), name="account"),
     path("step1/", AppStep1View.as_view(), name="step1"),
     path("step2/", AppStep2View.as_view(), name="step2"),
     path("step3/", AppStep3View.as_view(), name="step3"),
-    path("step4/", AppStep4View.as_view(), name="step4")
+    path("step4/", AppStep4View.as_view(), name="step4"),
 ]
