@@ -223,7 +223,9 @@ def Ajax(request):
                f", czas przygotowania do {meal_time}, możesz dorzucić jakieś produkty od siebie, podaj także " \
                f"instrukcję przygotowania."
         print(text)
-        openai.api_key = settings.OPENAI_API_KEY
+        asd = 'asd'
+        asd = settings.OPENAI_API_KEY
+        print(openai)
         res = openai.ChatCompletion.create(
             model="gpt-3.5-turbo",
             messages=[
