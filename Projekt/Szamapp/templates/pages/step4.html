@@ -21,6 +21,10 @@
         <input type="submit" name="submit" value="Dalej">
     </form>
 
+    {% if user.is_authenticated %}
+    <a href="/account" class="btn btn-outline-success"> Konto użytkownika </a>
+    {% endif %}
+
 {% endblock content %}
 
 {% block footer %}

@@ -6,6 +6,7 @@ from Szamapp.models import *
 from django.http import JsonResponse
 from django.views.decorators.csrf import csrf_exempt, csrf_protect
 import openai
+from django.conf import settings
 
 
 def index(request):
@@ -19,6 +20,8 @@ def main(request):
 @csrf_protect
 def userlogin(request):
     if request.method == 'GET':
+        if request.user is not None:
+            return redirect('step1')
         form = UserLoginForm
         ctx = {
             'form': form
@@ -220,7 +223,7 @@ def Ajax(request):
                f", czas przygotowania do {meal_time}, możesz dorzucić jakieś produkty od siebie, podaj także " \
                f"instrukcję przygotowania."
         print(text)
-        openai.api_key = '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'
+        openai.api_key = settings.OPENAI_API_KEY
         res = openai.ChatCompletion.create(
             model="gpt-3.5-turbo",
             messages=[
