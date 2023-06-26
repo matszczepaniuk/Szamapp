@@ -18,7 +18,7 @@ from django.contrib import admin
 from django.urls import include, path
 
 from Szamapp.views import userlogin, index, RegistrationView, UserAccountView, AppStep1View, AppStep2View, \
-    AppStep3View, AppStep4View, chat, Ajax, main
+    AppStep3View, AppStep4View, chat, Ajax, main, AppStep5View
 
 urlpatterns = [
     path('', main, name='main'),
@@ -34,4 +34,5 @@ urlpatterns = [
     path("step2/", AppStep2View.as_view(), name="step2"),
     path("step3/", AppStep3View.as_view(), name="step3"),
     path("step4/", AppStep4View.as_view(), name="step4"),
+    path("step5/", AppStep5View.as_view(), name="step5")
 ]

@@ -14,6 +14,8 @@ def index(request):
 
 
 def main(request):
+    if request.user is not None:
+        return redirect('step1')
     return render(request, 'pages/main.html')
 
 
@@ -202,7 +204,19 @@ class AppStep4View(View):
                 'form': form
             }
             return render(request, 'pages/step4.html', ctx)
-        return redirect("chat")
+        chat = Ajax(request)
+        return redirect("step5")
+
+
+class AppStep5View(View):
+    def get(self, request):
+        return render(request, 'pages/step5.html')
+
+    def post(self, request):
+        offer1 = request.session.get('offer1')
+        offer2 = request.session.get('offer2')
+        offer3 = request.session.get('offer3')
+        return redirect("step4")
 
 
 def chat(request):
@@ -219,12 +233,11 @@ def Ajax(request):
     meal_type = request.session.get('types')
     meal_ingredients = request.session.get('ingredients')
     if request.headers.get('X-Requested-With') == 'XMLHttpRequest':  # Check if request is Ajax
-        text = f"Podaj propozycję przepisu na {meal_type} z następujących produktów: {meal_base}, {meal_ingredients}" \
-               f", czas przygotowania do {meal_time}, możesz dorzucić jakieś produkty od siebie, podaj także " \
-               f"instrukcję przygotowania."
+        text = f"Podaj 3 propozycje przepisów na {meal_type} z następujących produktów: {meal_base}, {meal_ingredients}" \
+               f", czas przygotowania do {meal_time}, możesz dorzucić jakieś produkty od siebie, na razie nie " \
+               f"podawaj także instrukcji przygotowania."
         print(text)
-        asd = 'asd'
-        asd = settings.OPENAI_API_KEY
+        openai.api_key = settings.OPENAI_API_KEY
         print(openai)
         res = openai.ChatCompletion.create(
             model="gpt-3.5-turbo",
@@ -234,6 +247,15 @@ def Ajax(request):
         )
         response = res.choices[0].message["content"]
         print(res)
-        request.session['meal'] = response
+        offers = []
+        response.split('2')
+        offers.append(response[0])
+        part_response = response[1]
+        part_response.split('3')
+        offers.append(part_response[0])
+        offers.append(part_response[1])
+        request.session['offer1'] = offers[0]
+        request.session['offer2'] = offers[1]
+        request.session['offer3'] = offers[2]
         return JsonResponse({'data': response, })
     return JsonResponse({})

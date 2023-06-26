@@ -1,13 +1,13 @@
 {% extends 'layouts/base_sections.html' %}
 {% load static %}
 
-{% block title %} Soft UI Design System by Creative Tim {% endblock title %}
+{% block title %}
+
+{% endblock title %}
 
 {% block body %} class="features-sections" {% endblock body %}
 
 {% block header %}
-
-{% include 'includes/navigation_light.html' %}
 
 {% endblock header %}
 
@@ -18,7 +18,8 @@
     <form method="POST">
         {% csrf_token %}
         {{ form }}
-        <input type="submit" name="submit" value="Dalej">
+{#        <input type="submit" id="submitBtn" name="submit" value="Dalej">#}
+         <button id="submitBtn" class="btn btn-primary fs-5">Wyślij</button>
     </form>
 
     {% if user.is_authenticated %}
@@ -28,7 +29,13 @@
 {% endblock content %}
 
 {% block footer %}
-  
+        <!-- JavaScript Bundle with Popper -->
+    <script type="text/javascript" src="{% static 'js/core/popper.min.js' %}" defer></script>
+    <script type="text/javascript" src="{% static 'js/core/bootstrap.min.js' %}" defer></script>
+    <!--AJAX-->
+    <script type="text/javascript" src="{% static 'admin/js/vendor/jquery/jquery.min.js' %}" defer></script>
+    <!--My JS-->
+    <script src="{% static "chatgpt.js" %}" defer></script>
 {% endblock footer %}
 
 {% block javascripts %}

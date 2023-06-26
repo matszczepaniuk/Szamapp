@@ -1,7 +1,5 @@
 document.addEventListener('DOMContentLoaded', function(){
-console.log('twoj stary');
     document.querySelector('#submitBtn').addEventListener('click', () => chat_ajax());
-
 });
 
 function chat_ajax(){
@@ -12,8 +10,6 @@ function chat_ajax(){
         <h5 class="card-title">${text}</h5>
     </div>
     `
-    console.log(text)
-
     // Clear input:
     document.querySelector('#userText').value = null
 
