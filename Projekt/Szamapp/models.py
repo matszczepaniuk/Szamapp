@@ -8,7 +8,7 @@ class Ingredient(models.Model):
 
 class Recipe(models.Model):
     name = models.CharField(max_length=64)
-    instructions = models.CharField(max_length=1024)
+    instructions = models.CharField(max_length=8192)
     ingredients = models.ManyToManyField(Ingredient, through="RecipeIngredient")
 
 
@@ -24,22 +24,9 @@ class User(User):
 
 class FavouriteRecipes(models.Model):
     name = models.CharField(max_length=112)
-    user_id = models.ForeignKey(User, on_delete=models.CASCADE, null=True)
+    user = models.CharField(max_length=100, default=0)
 
 
 class Statistics(models.Model):
-    recipes = models.IntegerField
-    users = models.IntegerField
-
-
-class MealBaseOptions(models.Model):
-    name = models.CharField(max_length=32)
-
-    def __str__(self):
-        return self.name
-
-
-class Chat(models.Model):
-    text = models.CharField(max_length=500)
-    gpt = models.CharField(max_length=17000)
-    date = models.DateTimeField(auto_now_add=True, blank=True, null=True)
+    recipes = models.CharField(max_length=100, default=0)
+    users = models.CharField(max_length=100, default=0)

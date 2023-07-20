@@ -13,22 +13,27 @@
 
 {% block content %}
 
+    <h1>Przepis na: {{ name }}</h1>
+    <h2>Składniki i opis przygotowania:</h2>
+    <h2>{{ recipe }}</h2>
+
     <form method="POST">
-        {% csrf_token %}
-        <input type="submit" name="btn" value="Danie wegańskie">
-        <input type="submit" name="btn" value="Danie wegetariańskie">
-        <input type="submit" name="btn" value="Danie mięsne">
-    </form>
+    {% csrf_token %}
 
     {% if user.is_authenticated %}
+    <button type="submit" class="btn.bg-white:hover" name="save"> Dodaj przepis do ulubionych</button>
     <a href="/account" class="btn btn-outline-success"> Konto użytkownika </a>
     <a href="/logout" class="btn btn-outline-success"> Wyloguj </a>
     {% endif %}
 
+    <button type="submit" class="btn.bg-white:hover" name="exit"> Wyjdź</button>
+
+    </form>
+
 {% endblock content %}
 
 {% block footer %}
-  
+
 {% endblock footer %}
 
 {% block javascripts %}

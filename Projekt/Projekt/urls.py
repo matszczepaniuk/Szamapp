@@ -18,21 +18,23 @@ from django.contrib import admin
 from django.urls import include, path
 
 from Szamapp.views import userlogin, index, RegistrationView, UserAccountView, AppStep1View, AppStep2View, \
-    AppStep3View, AppStep4View, chat, Ajax, main, AppStep5View
+    AppStep3View, AppStep4View, ChatMealOffers, main, AppStep5View, ChatInstructions, AppStep6View, userlogout
 
 urlpatterns = [
     path('', main, name='main'),
     path('index/', index, name='index'),
     path("admin/", admin.site.urls),
     path('index/', include('theme_soft_design.urls')),
-    path('chat/', chat, name='chat'),
-    path('ajax/', Ajax, name='ajax'),
+    path('chat-meal-offers/', ChatMealOffers, name='chat_meal_offers'),
+    path('ajax2/', ChatInstructions, name='ajax2'),
     path("login/", userlogin, name="login"),
+    path("logout/", userlogout, name="logout"),
     path("register/", RegistrationView.as_view(), name="register"),
     path("account/", UserAccountView.as_view(), name="account"),
     path("step1/", AppStep1View.as_view(), name="step1"),
     path("step2/", AppStep2View.as_view(), name="step2"),
     path("step3/", AppStep3View.as_view(), name="step3"),
     path("step4/", AppStep4View.as_view(), name="step4"),
-    path("step5/", AppStep5View.as_view(), name="step5")
+    path("step5/", AppStep5View.as_view(), name="step5"),
+    path("step6/", AppStep6View.as_view(), name="step6")
 ]

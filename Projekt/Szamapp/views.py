@@ -1,34 +1,39 @@
 from django.shortcuts import render, redirect
 from django.views import View
-from django.contrib.auth import authenticate, login
+from django.contrib.auth import authenticate, login, logout
+from django.contrib.auth.mixins import LoginRequiredMixin
 from Szamapp.forms import *
 from Szamapp.models import *
-from django.http import JsonResponse
 from django.views.decorators.csrf import csrf_exempt, csrf_protect
 import openai
 from django.conf import settings
 
 
 def index(request):
+    #
     return render(request, 'pages/index.html')
 
 
 def main(request):
-    if request.user is not None:
+    """# Displays main page of the program"""
+    if request.user.is_authenticated:
         return redirect('step1')
-    return render(request, 'pages/main.html')
+    else:
+        return render(request, 'pages/main.html')
 
 
 @csrf_protect
 def userlogin(request):
+    """# Logs in user, if exists"""
     if request.method == 'GET':
-        if request.user is not None:
+        if request.user.is_authenticated:
             return redirect('step1')
-        form = UserLoginForm
-        ctx = {
-            'form': form
-        }
-        return render(request, 'pages/login.html', ctx)
+        else:
+            form = UserLoginForm
+            context = {
+                'form': form
+            }
+            return render(request, 'pages/login.html', context)
 
     if request.method == 'POST':
         username = request.POST["username"]
@@ -41,13 +46,26 @@ def userlogin(request):
         return redirect('step1')
 
 
+def userlogout(request):
+    """# Logs out user, if logged in"""
+    if request.user.is_authenticated:
+        username = request.user.username
+        if username is not None:
+            logout(request)
+            return redirect('main')
+
+
 class RegistrationView(View):
+    """# Creates user account"""
     def get(self, request):
-        form = RegistrationForm()
-        ctx = {
-            'form': form
-        }
-        return render(request, 'pages/registration.html', ctx)
+        if request.user.is_authenticated:
+            return redirect('step1')
+        else:
+            form = RegistrationForm()
+            context = {
+                'form': form
+            }
+            return render(request, 'pages/registration.html', context)
 
     def post(self, request):
         form = RegistrationForm(request.POST)
@@ -58,28 +76,30 @@ class RegistrationView(View):
             email = form.cleaned_data.get("email")
             if password1 == password2:
                 new_user = User.objects.create_user(username=username, email=email, password=password1)
+
                 return redirect('login')
             else:
                 form = RegistrationForm(request.POST)
-                ctx = {
+                context = {
                     'form': form
                 }
-                return render(request, 'pages/registration.html', ctx)
+                return render(request, 'pages/registration.html', context)
         else:
             form = RegistrationForm(request.POST)
-            ctx = {
+            context = {
                 'form': form
             }
-            return render(request, 'pages/registration.html', ctx)
+            return render(request, 'pages/registration.html', context)
 
 
-class UserAccountView(View):
+class UserAccountView(LoginRequiredMixin, View):
+    """# Displays user profile page, visible only for logged-in users"""
     def get(self, request):
         if request.user.is_authenticated:
             username = request.user.get_username()
             user = User.objects.get(username=username)
-            user_id = user.id
-            saved_recipes = FavouriteRecipes.objects.filter(user_id_id=user_id)
+            user_id = request.user.id
+            saved_recipes = FavouriteRecipes.objects.filter(user=user_id)
             return render(request, 'pages/account.html', {'saved_recipes': saved_recipes})
         else:
             return redirect('login')
@@ -93,12 +113,13 @@ class UserAccountView(View):
 
 
 class AppStep1View(View):
+    """# Handles page of the program, where preparation time is being selected"""
     def get(self, request):
         form = Step1Form()
-        ctx = {
+        context = {
             'form': form
         }
-        return render(request, 'pages/step1.html', ctx)
+        return render(request, 'pages/step1.html', context)
 
     def post(self, request):
         form = Step1Form(request.POST)
@@ -107,68 +128,72 @@ class AppStep1View(View):
             request.session['time'] = val
         else:
             form = Step1Form()
-            ctx = {
+            context = {
                 'form': form
             }
-            return render(request, 'pages/step1.html', ctx)
+            return render(request, 'pages/step1.html', context)
         return redirect('step2')
 
 
 class AppStep2View(View):
+    """# Handles page of the program, where meal base is being selected"""
     def get(self, request):
         form = Step2Form()
-        ctx = {
+        context = {
             'form': form
         }
-        return render(request, 'pages/step2.html', ctx)
+        return render(request, 'pages/step2.html', context)
 
     def post(self, request):
         form = Step2Form(request.POST)
         if form.is_valid():
             val = form.cleaned_data.get("btn")
             request.session['base'] = val
-            ads = request.session['base']
         else:
             form = Step2Form()
-            ctx = {
+            context = {
                 'form': form
             }
-            return render(request, 'pages/step2.html', ctx)
+            return render(request, 'pages/step2.html', context)
         return redirect('step3')
 
 
 class AppStep3View(View):
+    """# Handles page of the program, where meal type is being selected"""
     def get(self, request):
         form = Step3Form()
-        ctx = {
+        context = {
             'form': form
         }
-        return render(request, 'pages/step3.html', ctx)
+        return render(request, 'pages/step3.html', context)
 
     def post(self, request):
         form = Step3Form(request.POST)
         if form.is_valid():
-            meal_type = form.cleaned_data.get("meal_type")
-            types = []
-            for type in meal_type:
-                 types.append(type.name)
-            request.session['types'] = types
+            meal_type = form.cleaned_data.get("btn")
+            request.session['type'] = meal_type
         else:
             form = Step3Form()
-            ctx = {
+            context = {
                 'form': form
             }
-            return render(request, 'pages/step3.html', ctx)
+            return render(request, 'pages/step3.html', context)
         return redirect("step4")
 
 
 class AppStep4View(View):
+    """# Handles page of the program, where user gives preferred ingredients"""
     def get(self, request):
         form = Step4Form()
-        ctx = {
+        form.ingredient1 = request.session.get('ingredient1')
+        form.ingredient2 = request.session.get('ingredient2')
+        form.ingredient3 = request.session.get('ingredient3')
+        form.ingredient4 = request.session.get('ingredient4')
+        form.ingredient5 = request.session.get('ingredient5')
+        context = {
             'form': form
         }
-        return render(request, 'pages/step4.html', ctx)
+        return render(request, 'pages/step4.html', context)
 
     def post(self, request):
         form = Step4Form(request.POST)
@@ -178,84 +203,130 @@ class AppStep4View(View):
             ingredient_3 = form.cleaned_data.get("ingredient3")
             ingredient_4 = form.cleaned_data.get("ingredient4")
             ingredient_5 = form.cleaned_data.get("ingredient5")
-            ingredients = [ingredient_1, ingredient_2]
+            request.session['ingredient1'] = ingredient_1
+            request.session['ingredient2'] = ingredient_2
             i1 = Ingredient.objects.create(name=ingredient_1)
             i1.save()
             i2 = Ingredient.objects.create(name=ingredient_2)
             i2.save()
-            if ingredient_3 is not None:
-                ingredients.append(ingredient_3)
+            if ingredient_3 != "":
+                request.session['ingredient3'] = ingredient_3
                 i3 = Ingredient.objects.create(name=ingredient_3)
                 i3.save()
-            if ingredient_4 is not None:
-                ingredients.append(ingredient_4)
+            if ingredient_4 != "":
+                request.session['ingredient4'] = ingredient_4
                 i4 = Ingredient.objects.create(name=ingredient_4)
                 i4.save()
-            if ingredient_5 is not None:
-                ingredients.append(ingredient_5)
+            if ingredient_5 != "":
+                request.session['ingredient5'] = ingredient_5
                 i5 = Ingredient.objects.create(name=ingredient_5)
                 i5.save()
-            else:
-                pass
-            request.session['ingredients'] = ingredients
         else:
             form = Step4Form()
-            ctx = {
+            context = {
                 'form': form
             }
-            return render(request, 'pages/step4.html', ctx)
-        chat = Ajax(request)
-        return redirect("step5")
+            return render(request, 'pages/step4.html', context)
+        return ChatMealOffers(request)
 
 
 class AppStep5View(View):
+    """# Handles page of the program, where user select the mostly preferred meal"""
     def get(self, request):
-        return render(request, 'pages/step5.html')
+        chat_response_meals = request.session.get('first_response')
+        offers = chat_response_meals.split(".")
+        meal_one = offers[1]
+        first_meal = meal_one.rstrip(meal_one[-1])
+        request.session['first_meal'] = first_meal
+        meal_two = offers[2]
+        second_meal = meal_two.rstrip(meal_two[-1])
+        request.session['second_meal'] = second_meal
+        third_meal = offers[3]
+        request.session['third_meal'] = third_meal
+        context = {
+            'first_meal': first_meal,
+            'second_meal': second_meal,
+            'third_meal': third_meal,
+        }
+        return render(request, 'pages/step5.html', context)
 
     def post(self, request):
-        offer1 = request.session.get('offer1')
-        offer2 = request.session.get('offer2')
-        offer3 = request.session.get('offer3')
-        return redirect("step4")
+        if "first_meal" in request.POST:
+            first_meal = request.session.get('first_meal')
+            request.session['choice'] = first_meal
+        elif "second_meal" in request.POST:
+            second_meal = request.session.get('second_meal')
+            request.session['choice'] = second_meal
+        elif "third_meal" in request.POST:
+            third_meal = request.session.get('third_meal')
+            request.session['choice'] = third_meal
+        return ChatInstructions(request)
 
 
-def chat(request):
-    chats = Chat.objects.all()
-    return render(request, 'pages/chat.html', {
-        'chats': chats,
-    })
+class AppStep6View(View):
+    """# Handles the last page of the program, where ingredients and instructions are being given"""
+    def get(self, request):
+        name = request.session.get('choice')
+        recipe = request.session.get('second_response')
+        context = {
+            'name': name,
+            'recipe': recipe,
+        }
+        return render(request, 'pages/step6.html', context)
+
+    def post(self, request):
+        name = request.session.get('choice')
+        recipe = request.session.get('second_response')
+        if "save" in request.POST:
+            r = Recipe.objects.create(name=name, instructions=recipe)
+            r.save()
+            current_user = request.user
+            current_user_id = current_user.id
+            fav = FavouriteRecipes.objects.create(name=name, user=current_user_id)
+            return redirect('account')
+        elif "exit" in request.POST:
+            return redirect('main')
 
 
 @csrf_exempt
-def Ajax(request):
+def ChatMealOffers(request):
+    """# Background correspondence with Chat GPT, where 3 meal offers are being found"""
     meal_time = request.session.get('time')
     meal_base = request.session.get('base')
     meal_type = request.session.get('types')
-    meal_ingredients = request.session.get('ingredients')
-    if request.headers.get('X-Requested-With') == 'XMLHttpRequest':  # Check if request is Ajax
-        text = f"Podaj 3 propozycje przepisów na {meal_type} z następujących produktów: {meal_base}, {meal_ingredients}" \
-               f", czas przygotowania do {meal_time}, możesz dorzucić jakieś produkty od siebie, na razie nie " \
-               f"podawaj także instrukcji przygotowania."
-        print(text)
-        openai.api_key = settings.OPENAI_API_KEY
-        print(openai)
-        res = openai.ChatCompletion.create(
-            model="gpt-3.5-turbo",
-            messages=[
-                {"role": "user", "content": f"{text}"}
-            ]
-        )
-        response = res.choices[0].message["content"]
-        print(res)
-        offers = []
-        response.split('2')
-        offers.append(response[0])
-        part_response = response[1]
-        part_response.split('3')
-        offers.append(part_response[0])
-        offers.append(part_response[1])
-        request.session['offer1'] = offers[0]
-        request.session['offer2'] = offers[1]
-        request.session['offer3'] = offers[2]
-        return JsonResponse({'data': response, })
-    return JsonResponse({})
+    meal_ingredient1 = request.session.get('ingredient1')
+    meal_ingredient2 = request.session.get('ingredient2')
+    meal_ingredient3 = request.session.get('ingredient3')
+    meal_ingredient4 = request.session.get('ingredient4')
+    meal_ingredient5 = request.session.get('ingredient5')
+    text = f"Wypunktuj, jako listę numerowaną 3 propozycje {meal_type} z następujących produktów: {meal_base}, " \
+           f"{meal_ingredient1}, {meal_ingredient2}, {meal_ingredient3}, {meal_ingredient4}, {meal_ingredient4}, " \
+           f"{meal_ingredient5}, czas przygotowania do {meal_time}, możesz dorzucić jakieś produkty od siebie, podaj " \
+           f"tylko nazwy dań, na razie nie podawaj instrukcji przygotowania i listy składników"
+    openai.api_key = settings.OPENAI_API_KEY
+    res = openai.ChatCompletion.create(
+        model="gpt-3.5-turbo",
+        messages=[
+            {"role": "user", "content": f"{text}"}
+        ]
+    )
+    response = res.choices[0].message["content"]
+    request.session['first_response'] = response
+    return redirect('step5')
+
+
+@csrf_exempt
+def ChatInstructions(request):
+    """# Background correspondence with Chat GPT, where list of ingredients and instructions are being provided"""
+    selected_meal = request.session.get('choice')
+    text = f"Podaj listę składników i przepis dla dania {selected_meal}"
+    openai.api_key = settings.OPENAI_API_KEY
+    res = openai.ChatCompletion.create(
+        model="gpt-3.5-turbo",
+        messages=[
+            {"role": "user", "content": f"{text}"}
+        ]
+    )
+    response = res.choices[0].message["content"]
+    request.session['second_response'] = response
+    return redirect('step6')

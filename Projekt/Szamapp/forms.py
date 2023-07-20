@@ -1,6 +1,5 @@
 from django import forms
 from django.contrib.auth.forms import UserCreationForm, AuthenticationForm, UsernameField
-from Szamapp.models import MealBaseOptions
 
 
 class MainForm(forms.Form):
@@ -31,7 +30,7 @@ class UserLoginForm(AuthenticationForm):
     username = UsernameField(
         widget=forms.TextInput(attrs={"class": "form-control form-control-lg", "placeholder": "Login"}))
     password = forms.CharField(
-        label="Password",
+        label="Hasło",
         strip=False,
         widget=forms.PasswordInput(attrs={"class": "form-control form-control-lg", "placeholder": "Password"}),
     )
@@ -46,11 +45,7 @@ class Step2Form(forms.Form):
 
 
 class Step3Form(forms.Form):
-    meal_type = forms.ModelMultipleChoiceField(
-        queryset=MealBaseOptions.objects.all().order_by('id'),
-        label="Type",
-        widget=forms.CheckboxSelectMultiple
-    )
+    btn = forms.CharField()
 
 
 class Step4Form(forms.Form):
