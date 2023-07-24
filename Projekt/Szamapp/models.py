@@ -27,6 +27,6 @@ class FavouriteRecipes(models.Model):
     user = models.CharField(max_length=100, default=0)
 
 
-class Statistics(models.Model):
-    recipes = models.CharField(max_length=100, default=0)
-    users = models.CharField(max_length=100, default=0)
+class AppStatistics(models.Model):
+    recipes = models.IntegerField(null=True)
+    users = models.IntegerField(null=True)

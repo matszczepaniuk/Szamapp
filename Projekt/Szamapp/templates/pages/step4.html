@@ -13,7 +13,9 @@
 
 {% block content %}
 
-    Podaj, co najmniej 2 i maksymalnie 5 składników, które mają pojawić się w daniu.
+    <p>Podaj, co najmniej 2 i maksymalnie 5 składników, które mają pojawić się w daniu.</p>
+
+    <p style="color:red;">{{ message }}</p>
 
     <form id="chat-form" method="POST">
         {% csrf_token %}

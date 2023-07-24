@@ -76,7 +76,11 @@ class RegistrationView(View):
             email = form.cleaned_data.get("email")
             if password1 == password2:
                 new_user = User.objects.create_user(username=username, email=email, password=password1)
-
+                new_user.save()
+                users_stats = AppStatistics.objects.filter(id=1)
+                users_amount = int(users_stats.users)
+                new_users_amount = users_amount + 1
+                users_stats.update(users=new_users_amount)
                 return redirect('login')
             else:
                 form = RegistrationForm(request.POST)
@@ -103,13 +107,6 @@ class UserAccountView(LoginRequiredMixin, View):
             return render(request, 'pages/account.html', {'saved_recipes': saved_recipes})
         else:
             return redirect('login')
-
-    def post(self, request):
-        username = request.user.username
-        user = User.objects.get(username=username)
-        if "delete" in request.POST:
-            user.delete()
-        return render(request, 'pages/account.html')
 
 
 class AppStep1View(View):
@@ -224,7 +221,8 @@ class AppStep4View(View):
         else:
             form = Step4Form()
             context = {
-                'form': form
+                'form': form,
+                'message': 'Musisz podać dwa składniki'
             }
             return render(request, 'pages/step4.html', context)
         return ChatMealOffers(request)
@@ -283,6 +281,10 @@ class AppStep6View(View):
             current_user = request.user
             current_user_id = current_user.id
             fav = FavouriteRecipes.objects.create(name=name, user=current_user_id)
+            recipes_stats = AppStatistics.objects.filter(id=1)
+            recipes_amount = int(recipes_stats.recipes)
+            new_recipes_amount = recipes_amount + 1
+            recipes_stats.update(recipes=new_recipes_amount)
             return redirect('account')
         elif "exit" in request.POST:
             return redirect('main')
@@ -293,7 +295,7 @@ def ChatMealOffers(request):
     """# Background correspondence with Chat GPT, where 3 meal offers are being found"""
     meal_time = request.session.get('time')
     meal_base = request.session.get('base')
-    meal_type = request.session.get('types')
+    meal_type = request.session.get('type')
     meal_ingredient1 = request.session.get('ingredient1')
     meal_ingredient2 = request.session.get('ingredient2')
     meal_ingredient3 = request.session.get('ingredient3')
